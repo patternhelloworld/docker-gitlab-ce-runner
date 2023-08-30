@@ -1,7 +1,7 @@
 version: '3'
 
 services:
-  hyper-cell-gitlab-ce:
+  docker-gitlab-ce-runner:
     container_name: docker-gitlab-ce-runner
     stdin_open: true
     tty: true
@@ -43,7 +43,7 @@ services:
 
     privileged: true
     network_mode: bridge
-    image: hyper-cell-gitlab-ce:latest
+    image: gitlab/gitlab-ce:13.12.10-ce.0
     #image: gitlab/gitlab-ce:13.12.10-ce.0
     volumes:
       - ${GIT_DATA_PATH}:/var/opt/gitlab
