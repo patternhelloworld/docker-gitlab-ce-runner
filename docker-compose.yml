@@ -1,0 +1,52 @@
+version: '3'
+
+services:
+  hyper-cell-gitlab-ce:
+    container_name: docker-gitlab-ce-runner
+    stdin_open: true
+    tty: true
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    ports:
+      - '${GITLAB_HTTP_PORT}:${GITLAB_HTTP_PORT}'
+      - '${GITLAB_SSH_PORT}:22'
+      - '${GITLAB_DOCKER_REGISTRY_PORT}:${GITLAB_DOCKER_REGISTRY_PORT}'
+    restart: always
+    hostname: ${GITLAB_HOSTNAME}
+    environment:
+      GITLAB_OMNIBUS_CONFIG: |
+        external_url '${GITLAB_PROTOCOL}://${GITLAB_HOSTNAME}:${GITLAB_HTTP_PORT}'
+        registry_external_url '${GITLAB_PROTOCOL}://${GITLAB_DOCKER_REGISTRY_HOSTNAME}:${GITLAB_DOCKER_REGISTRY_PORT}'
+        
+        gitlab_rails['gitlab_shell_ssh_port'] = ${GITLAB_SSH_PORT}
+        gitlab_rails['time_zone'] = 'Asia/Seoul'
+
+        gitlab_rails['registry_enabled'] = true
+        gitlab_rails['registry_host'] = "${GITLAB_DOCKER_REGISTRY_HOSTNAME}"
+        gitlab_rails['registry_port'] = "${GITLAB_DOCKER_REGISTRY_PORT}"
+        registry['env'] = {
+        "REGISTRY_HTTP_RELATIVEURLS" => true
+        }
+        registry['token_realm'] = '${GITLAB_DOCKER_REGISTRY_PROTOCOL}://${GITLAB_DOCKER_REGISTRY_HOSTNAME}:9094'
+        
+        gitlab_rails['smtp_enable'] = true
+        gitlab_rails['smtp_address'] = "smtp.gmail.com"
+        gitlab_rails['smtp_port'] = 587
+        gitlab_rails['smtp_user_name'] = "${SMTP_GMAIL_USERNAME}"
+        gitlab_rails['smtp_password'] = "${SMTP_GMAIL_PASSWORD}"
+        gitlab_rails['smtp_domain'] = "smtp.gmail.com"
+        gitlab_rails['smtp_authentication'] = "login"
+        gitlab_rails['smtp_enable_starttls_auto'] = true
+        gitlab_rails['smtp_tls'] = false
+        
+        gitlab_rails['smtp_openssl_verify_mode'] = "peer"
+
+    privileged: true
+    network_mode: bridge
+    image: hyper-cell-gitlab-ce:latest
+    #image: gitlab/gitlab-ce:13.12.10-ce.0
+    volumes:
+      - ${GIT_DATA_PATH}:/var/opt/gitlab
+      - ${GIT_LOG_PATH}:/var/log/gitlab
+      - ${GIT_CONFIG_PATH}:/etc/gitlab
+      - ${GIT_BACKUP_PATH}:/var/opt/gitlab/backups

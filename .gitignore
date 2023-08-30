@@ -1,0 +1,8 @@
+/backup/*
+!/backup/.gitkeep
+/config/*
+!/config/.gitkeep
+/data/*
+!/data/.gitkeep
+/log/*
+!/log/.gitkeep
