@@ -1,5 +1,4 @@
 version: '3'
-
 services:
   docker-gitlab-ce-runner:
     container_name: docker-gitlab-ce-runner
@@ -17,7 +16,10 @@ services:
       GITLAB_OMNIBUS_CONFIG: |
         external_url '${GITLAB_PROTOCOL}://${GITLAB_HOSTNAME}:${GITLAB_HTTP_PORT}'
         registry_external_url '${GITLAB_PROTOCOL}://${GITLAB_DOCKER_REGISTRY_HOSTNAME}:${GITLAB_DOCKER_REGISTRY_PORT}'
-        
+        nginx['ssl_certificate'] = "/etc/gitlab/ssl/${SSL_CERT_NAME}.chained.crt"
+        nginx['ssl_certificate_key'] = "/etc/gitlab/ssl/${SSL_CERT_NAME}.key"
+
+
         gitlab_rails['gitlab_shell_ssh_port'] = ${GITLAB_SSH_PORT}
         gitlab_rails['time_zone'] = 'Asia/Seoul'
 
@@ -28,7 +30,7 @@ services:
         "REGISTRY_HTTP_RELATIVEURLS" => true
         }
         registry['token_realm'] = '${GITLAB_DOCKER_REGISTRY_PROTOCOL}://${GITLAB_DOCKER_REGISTRY_HOSTNAME}:9094'
-        
+
         gitlab_rails['smtp_enable'] = true
         gitlab_rails['smtp_address'] = "smtp.gmail.com"
         gitlab_rails['smtp_port'] = 587
@@ -38,13 +40,12 @@ services:
         gitlab_rails['smtp_authentication'] = "login"
         gitlab_rails['smtp_enable_starttls_auto'] = true
         gitlab_rails['smtp_tls'] = false
-        
+
         gitlab_rails['smtp_openssl_verify_mode'] = "peer"
 
     privileged: true
     network_mode: bridge
     image: gitlab/gitlab-ce:13.12.10-ce.0
-    #image: gitlab/gitlab-ce:13.12.10-ce.0
     volumes:
       - ${GIT_DATA_PATH}:/var/opt/gitlab
       - ${GIT_LOG_PATH}:/var/log/gitlab
